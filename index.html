@@ -1,0 +1,1265 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>خودشناس - تشخیص تیپ شخصیتی با DeepSeek</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Reset و تنظیمات پایه */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Vazirmatn', 'Calibri', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8fafc;
+            color: #333;
+            line-height: 1.7;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* هدر و منو */
+        header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        
+        .header-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .logo h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: white;
+        }
+        
+        .logo i {
+            font-size: 2rem;
+            color: #64b5f6;
+        }
+        
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 30px;
+        }
+        
+        nav ul li a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 1.1rem;
+            padding: 5px 10px;
+            border-radius: 5px;
+            transition: all 0.3s;
+        }
+        
+        nav ul li a:hover {
+            background-color: rgba(255, 255, 255, 0.15);
+            color: #bbdefb;
+        }
+        
+        nav ul li a.active {
+            background-color: rgba(255, 255, 255, 0.2);
+            color: #bbdefb;
+        }
+        
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+        
+        /* بخش اصلی */
+        .main-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 30px 20px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+        
+        /* بخش معرفی */
+        .intro-section {
+            background-color: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+            border-right: 5px solid #2a5298;
+        }
+        
+        .intro-section h2 {
+            color: #1e3c72;
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .intro-section h2 i {
+            color: #2a5298;
+        }
+        
+        .intro-content {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+        }
+        
+        .intro-text {
+            flex: 2;
+        }
+        
+        .intro-text p {
+            margin-bottom: 15px;
+            color: #555;
+            text-align: justify;
+        }
+        
+        .intro-image {
+            flex: 1;
+            text-align: center;
+        }
+        
+        .intro-image img {
+            max-width: 100%;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* بخش خدمات */
+        .services-section {
+            background-color: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+            border-right: 5px solid #2a5298;
+        }
+        
+        .services-section h2 {
+            color: #1e3c72;
+            margin-bottom: 25px;
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .services-section h2 i {
+            color: #2a5298;
+        }
+        
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+        }
+        
+        .service-card {
+            background: linear-gradient(135deg, #f8fafc 0%, #e3f2fd 100%);
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+            border-top: 3px solid #2a5298;
+            transition: all 0.3s;
+        }
+        
+        .service-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .service-icon {
+            background-color: #e3f2fd;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            color: #1e3c72;
+            font-size: 1.5rem;
+        }
+        
+        .service-card h3 {
+            color: #1e3c72;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+        
+        .service-card p {
+            color: #666;
+            line-height: 1.8;
+        }
+        
+        /* بخش چت */
+        .chat-section {
+            background-color: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+            border-right: 5px solid #2a5298;
+        }
+        
+        .chat-section h2 {
+            color: #1e3c72;
+            margin-bottom: 25px;
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .chat-section h2 i {
+            color: #2a5298;
+        }
+        
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            height: 500px;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .chat-header {
+            background: linear-gradient(135deg, #2a5298 0%, #1e3c72 100%);
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .chat-header i {
+            font-size: 1.3rem;
+        }
+        
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            background-color: #f9f9f9;
+        }
+        
+        .message {
+            max-width: 80%;
+            padding: 12px 18px;
+            border-radius: 18px;
+            line-height: 1.5;
+            word-wrap: break-word;
+        }
+        
+        .user-message {
+            align-self: flex-end;
+            background-color: #e3f2fd;
+            border-bottom-right-radius: 5px;
+            color: #1e3c72;
+        }
+        
+        .ai-message {
+            align-self: flex-start;
+            background-color: white;
+            border-bottom-left-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            color: #333;
+        }
+        
+        .message-sender {
+            font-weight: bold;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
+        
+        .chat-input-container {
+            display: flex;
+            padding: 15px;
+            background-color: white;
+            border-top: 1px solid #e0e0e0;
+        }
+        
+        .chat-input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 25px;
+            font-family: 'Vazirmatn', 'Calibri', sans-serif;
+            font-size: 1rem;
+            resize: none;
+            height: 50px;
+            outline: none;
+            transition: border 0.3s;
+        }
+        
+        .chat-input:focus {
+            border-color: #2a5298;
+        }
+        
+        .send-btn {
+            background: linear-gradient(135deg, #2a5298 0%, #1e3c72 100%);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            margin-right: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .send-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 3px 10px rgba(42, 82, 152, 0.3);
+        }
+        
+        /* بخش تحلیل شخصیت */
+        .analysis-section {
+            background-color: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+            border-right: 5px solid #2a5298;
+        }
+        
+        .analysis-section h2 {
+            color: #1e3c72;
+            margin-bottom: 25px;
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .analysis-section h2 i {
+            color: #2a5298;
+        }
+        
+        .analysis-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+        
+        .personality-card {
+            background: linear-gradient(135deg, #f8fafc 0%, #e3f2fd 100%);
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+            text-align: center;
+        }
+        
+        .personality-type {
+            font-size: 2.2rem;
+            font-weight: bold;
+            color: #1e3c72;
+            margin: 15px 0;
+        }
+        
+        .personality-name {
+            font-size: 1.5rem;
+            color: #2a5298;
+            margin-bottom: 10px;
+        }
+        
+        .personality-description {
+            color: #666;
+            line-height: 1.8;
+            margin-top: 15px;
+            text-align: justify;
+        }
+        
+        .traits-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .trait {
+            background-color: white;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+        
+        .trait-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+        
+        .trait-name {
+            font-weight: 600;
+            color: #1e3c72;
+        }
+        
+        .trait-value {
+            font-weight: 600;
+            color: #2a5298;
+        }
+        
+        .progress-bar {
+            height: 10px;
+            background-color: #e0e0e0;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #64b5f6 0%, #2a5298 100%);
+            width: 50%;
+            border-radius: 5px;
+            transition: width 1s ease-in-out;
+        }
+        
+        /* فوتر */
+        footer {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 40px 0 20px;
+            margin-top: 50px;
+        }
+        
+        .footer-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 30px;
+        }
+        
+        .footer-logo {
+            flex: 1;
+            min-width: 250px;
+        }
+        
+        .footer-logo h3 {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .footer-logo p {
+            color: #bbdefb;
+            line-height: 1.8;
+        }
+        
+        .footer-links {
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        .footer-links h4 {
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+            color: #bbdefb;
+        }
+        
+        .footer-links ul {
+            list-style: none;
+        }
+        
+        .footer-links ul li {
+            margin-bottom: 10px;
+        }
+        
+        .footer-links ul li a {
+            color: #e3f2fd;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        
+        .footer-links ul li a:hover {
+            color: white;
+        }
+        
+        .copyright {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            width: 100%;
+            color: #bbdefb;
+            font-size: 0.9rem;
+        }
+        
+        /* انیمیشن‌ها */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.8s ease-out;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        /* استایل‌های موبایل */
+        @media (max-width: 768px) {
+            .header-container {
+                padding: 15px;
+            }
+            
+            nav ul {
+                display: none;
+                position: absolute;
+                top: 70px;
+                right: 0;
+                background-color: #1e3c72;
+                width: 100%;
+                flex-direction: column;
+                padding: 20px;
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+                border-radius: 0 0 10px 10px;
+            }
+            
+            nav ul.show {
+                display: flex;
+            }
+            
+            .mobile-menu-btn {
+                display: block;
+            }
+            
+            .intro-content {
+                flex-direction: column;
+            }
+            
+            .services-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .analysis-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .footer-content {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+            
+            .chat-container {
+                height: 400px;
+            }
+            
+            .message {
+                max-width: 90%;
+            }
+        }
+        
+        /* استایل‌های تایپینگ */
+        .typing-indicator {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 10px 15px;
+            background-color: white;
+            border-radius: 18px;
+            width: fit-content;
+            align-self: flex-start;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+        
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background-color: #999;
+            border-radius: 50%;
+            animation: typing 1.4s infinite ease-in-out;
+        }
+        
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+        
+        @keyframes typing {
+            0%, 80%, 100% { transform: translateY(0); opacity: 0.5; }
+            40% { transform: translateY(-10px); opacity: 1; }
+        }
+        
+        /* دکمه‌های اسکرول */
+        .scroll-top {
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
+            background: linear-gradient(135deg, #2a5298 0%, #1e3c72 100%);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 3px 15px rgba(42, 82, 152, 0.3);
+            transition: all 0.3s;
+            z-index: 999;
+        }
+        
+        .scroll-top:hover {
+            transform: translateY(-5px);
+        }
+    </style>
+</head>
+<body>
+    <!-- هدر و منو -->
+    <header>
+        <div class="header-container">
+            <div class="logo">
+                <i class="fas fa-brain"></i>
+                <h1>خودشناس</h1>
+            </div>
+            
+            <button class="mobile-menu-btn" id="mobileMenuBtn">
+                <i class="fas fa-bars"></i>
+            </button>
+            
+            <nav>
+                <ul id="mainMenu">
+                    <li><a href="#home" class="active">خانه</a></li>
+                    <li><a href="#intro">معرفی ما</a></li>
+                    <li><a href="#services">خدمات ما</a></li>
+                    <li><a href="#chat">گفتگو با DeepSeek</a></li>
+                    <li><a href="#analysis">تحلیل شخصیت</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- محتوای اصلی -->
+    <div class="main-container">
+        <!-- بخش معرفی -->
+        <section id="intro" class="intro-section fade-in">
+            <h2><i class="fas fa-info-circle"></i> معرفی ما</h2>
+            <div class="intro-content">
+                <div class="intro-text">
+                    <p><strong>خودشناس</strong> یک پلتفرم پیشرفته برای شناخت بهتر شخصیت شما با استفاده از هوش مصنوعی است. ما با بهره‌گیری از فناوری DeepSeek، به شما کمک می‌کنیم تا جنبه‌های مختلف شخصیت خود را کشف و درک کنید.</p>
+                    <p>این سیستم با تحلیل گفتگوهای شما و پاسخ‌هایی که به سوالات مختلف می‌دهید، می‌تواند الگوهای رفتاری، ترجیحات و ویژگی‌های شخصیتی شما را شناسایی کند. نتایج این تحلیل به شما کمک می‌کند تا خود را بهتر بشناسید و در زمینه‌های مختلف زندگی مانند انتخاب شغل، بهبود روابط و رشد شخصی از این دانش استفاده کنید.</p>
+                    <p>هدف ما در خودشناس، ارائه ابزاری دقیق و کاربردی برای خودشناسی با استفاده از پیشرفته‌ترین تکنولوژی‌های هوش مصنوعی است. ما معتقدیم که شناخت عمیق از خود، اولین قدم برای رشد و توسعه فردی است.</p>
+                </div>
+                <div class="intro-image">
+                    <img src="https://images.unsplash.com/photo-1553877522-43269d4ea984?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" alt="تحلیل شخصیت با هوش مصنوعی">
+                </div>
+            </div>
+        </section>
+
+        <!-- بخش خدمات -->
+        <section id="services" class="services-section fade-in">
+            <h2><i class="fas fa-concierge-bell"></i> خدمات ما</h2>
+            <div class="services-grid">
+                <div class="service-card">
+                    <div class="service-icon">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <h3>گفتگو هوشمند با DeepSeek</h3>
+                    <p>گفتگوی طبیعی و روان با هوش مصنوعی پیشرفته DeepSeek برای شناخت بهتر شخصیت شما از طریق مکالمه</p>
+                </div>
+                
+                <div class="service-card">
+                    <div class="service-icon">
+                        <i class="fas fa-chart-pie"></i>
+                    </div>
+                    <h3>تحلیل تیپ شخصیتی</h3>
+                    <p>شناسایی دقیق تیپ شخصیتی شما بر اساس مدل‌های معتبر روانشناسی و ارائه گزارش کامل</p>
+                </div>
+                
+                <div class="service-card">
+                    <div class="service-icon">
+                        <i class="fas fa-lightbulb"></i>
+                    </div>
+                    <h3>پیشنهادهای شخصی‌سازی شده</h3>
+                    <p>ارائه راهکارها و پیشنهادهای متناسب با شخصیت شما برای بهبود زندگی شخصی و حرفه‌ای</p>
+                </div>
+                
+                <div class="service-card">
+                    <div class="service-icon">
+                        <i class="fas fa-user-friends"></i>
+                    </div>
+                    <h3>تحلیل روابط بین فردی</h3>
+                    <p>شناسایی الگوهای رفتاری شما در روابط و ارائه راهکار برای بهبود ارتباطات بین فردی</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- بخش چت -->
+        <section id="chat" class="chat-section fade-in">
+            <h2><i class="fas fa-comments"></i> گفتگو با DeepSeek</h2>
+            <div class="chat-container">
+                <div class="chat-header">
+                    <i class="fas fa-robot pulse"></i>
+                    <span>DeepSeek - هوش مصنوعی خودشناس</span>
+                </div>
+                
+                <div class="chat-messages" id="chatMessages">
+                    <div class="message ai-message">
+                        <div class="message-sender">DeepSeek:</div>
+                        <div>سلام! من DeepSeek هستم و قراره بهت کمک کنم تا شخصیت خودت رو بهتر بشناسی. می‌تونی کمی درباره خودت برام بگی؟ مثلاً دوست داری وقت آزادت رو چطور بگذرونی؟</div>
+                    </div>
+                </div>
+                
+                <div class="chat-input-container">
+                    <textarea class="chat-input" id="userInput" placeholder="پیام خود را اینجا تایپ کنید..."></textarea>
+                    <button class="send-btn" id="sendButton">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- بخش تحلیل شخصیت -->
+        <section id="analysis" class="analysis-section fade-in">
+            <h2><i class="fas fa-chart-bar"></i> تحلیل شخصیت</h2>
+            <div class="analysis-content">
+                <div class="personality-card">
+                    <div class="personality-type" id="personalityType">INFP</div>
+                    <div class="personality-name" id="personalityName">میانجی</div>
+                    <div class="personality-description" id="personalityDescription">
+                        افراد با تیپ شخصیتی INFP ایده‌آل‌گرا، خلاق و دلسوز هستند. آن‌ها به ارزش‌های شخصی خود عمیقاً پایبندند و به رشد فردی اهمیت زیادی می‌دهند. INFPها معمولاً درون‌گرا، شهودی، احساسی و ادراکی هستند.
+                    </div>
+                </div>
+                
+                <div class="traits-container">
+                    <div class="trait">
+                        <div class="trait-header">
+                            <span class="trait-name">برونگرایی</span>
+                            <span class="trait-value">30%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="extraversionBar" style="width: 30%;"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="trait">
+                        <div class="trait-header">
+                            <span class="trait-name">سازگاری</span>
+                            <span class="trait-value">85%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="agreeablenessBar" style="width: 85%;"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="trait">
+                        <div class="trait-header">
+                            <span class="trait-name">وجدان‌کاری</span>
+                            <span class="trait-value">70%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="conscientiousnessBar" style="width: 70%;"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="trait">
+                        <div class="trait-header">
+                            <span class="trait-name">ثبات عاطفی</span>
+                            <span class="trait-value">60%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="emotionalStabilityBar" style="width: 60%;"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="trait">
+                        <div class="trait-header">
+                            <span class="trait-name">گشودگی به تجربه</span>
+                            <span class="trait-value">90%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="opennessBar" style="width: 90%;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- فوتر -->
+    <footer>
+        <div class="footer-container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <h3><i class="fas fa-brain"></i> خودشناس</h3>
+                    <p>پلتفرم پیشرفته تحلیل شخصیت با استفاده از هوش مصنوعی DeepSeek. ما به شما کمک می‌کنیم تا خود را بهتر بشناسید و از این شناخت در زندگی شخصی و حرفه‌ای خود استفاده کنید.</p>
+                </div>
+                
+                <div class="footer-links">
+                    <h4>لینک‌های سریع</h4>
+                    <ul>
+                        <li><a href="#home">خانه</a></li>
+                        <li><a href="#intro">معرفی ما</a></li>
+                        <li><a href="#services">خدمات ما</a></li>
+                        <li><a href="#chat">گفتگو با DeepSeek</a></li>
+                        <li><a href="#analysis">تحلیل شخصیت</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-links">
+                    <h4>تماس با ما</h4>
+                    <ul>
+                        <li><i class="fas fa-envelope"></i> info@khod-shenas.ir</li>
+                        <li><i class="fas fa-phone"></i> ۰۲۱-۱۲۳۴۵۶۷۸</li>
+                        <li><i class="fas fa-map-marker-alt"></i> تهران، خیابان ولیعصر</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="copyright">
+                <p>کلیه حقوق مادی و معنوی این وب‌سایت متعلق به خودشناس می‌باشد. © ۱۴۰۳</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- دکمه اسکرول به بالا -->
+    <div class="scroll-top" id="scrollTop">
+        <i class="fas fa-arrow-up"></i>
+    </div>
+
+    <script>
+        // داده‌های تیپ‌های شخصیتی
+        const personalityTypes = {
+            "INFP": {
+                name: "میانجی",
+                description: "افراد با تیپ شخصیتی INFP ایده‌آل‌گرا، خلاق و دلسوز هستند. آن‌ها به ارزش‌های شخصی خود عمیقاً پایبندند و به رشد فردی اهمیت زیادی می‌دهند. INFPها معمولاً درون‌گرا، شهودی، احساسی و ادراکی هستند.",
+                traits: {
+                    "برونگرایی": 30,
+                    "سازگاری": 85,
+                    "وجدان‌کاری": 70,
+                    "ثبات عاطفی": 60,
+                    "گشودگی به تجربه": 90
+                }
+            },
+            "INTJ": {
+                name: "معمار",
+                description: "INTJها استراتژیست‌های مبتکر با ذهنی تحلیلگر هستند. مستقل، مصمم و علاقه‌مند به حل مسائل پیچیده و طراحی سیستم‌های کارآمد می‌باشند.",
+                traits: {
+                    "برونگرایی": 20,
+                    "سازگاری": 40,
+                    "وجدان‌کاری": 90,
+                    "ثبات عاطفی": 70,
+                    "گشودگی به تجربه": 85
+                }
+            },
+            "ENFP": {
+                name: "مبارز",
+                description: "ENFPها افرادی پرانرژی، خلاق و اجتماعی هستند که عاشق امکانات جدید می‌باشند. مشتاق، مردم‌دار و مستقل هستند.",
+                traits: {
+                    "برونگرایی": 95,
+                    "سازگاری": 85,
+                    "وجدان‌کاری": 60,
+                    "ثبات عاطفی": 65,
+                    "گشودگی به تجربه": 90
+                }
+            },
+            "ESTJ": {
+                name: "مدیر",
+                description: "ESTJها افرادی کارآمد و مسئولیت‌پذیر هستند که دوست دارند امور را سازماندهی کنند. منطقی، قاطع و عمل‌گرا هستند.",
+                traits: {
+                    "برونگرایی": 85,
+                    "سازگاری": 50,
+                    "وجدان‌کاری": 90,
+                    "ثبات عاطفی": 80,
+                    "گشودگی به تجربه": 40
+                }
+            }
+        };
+
+        // DOM elements
+        const chatMessages = document.getElementById('chatMessages');
+        const userInput = document.getElementById('userInput');
+        const sendButton = document.getElementById('sendButton');
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const mainMenu = document.getElementById('mainMenu');
+        const scrollTop = document.getElementById('scrollTop');
+        
+        // عناصر تحلیل شخصیت
+        const personalityTypeEl = document.getElementById('personalityType');
+        const personalityNameEl = document.getElementById('personalityName');
+        const personalityDescriptionEl = document.getElementById('personalityDescription');
+        
+        // نوارهای پیشرفت
+        const extraversionBar = document.getElementById('extraversionBar');
+        const agreeablenessBar = document.getElementById('agreeablenessBar');
+        const conscientiousnessBar = document.getElementById('conscientiousnessBar');
+        const emotionalStabilityBar = document.getElementById('emotionalStabilityBar');
+        const opennessBar = document.getElementById('opennessBar');
+        
+        // متغیرهای حالت
+        let conversationHistory = [];
+        let personalityScores = {
+            "برونگرایی": 50,
+            "سازگاری": 50,
+            "وجدان‌کاری": 50,
+            "ثبات عاطفی": 50,
+            "گشودگی به تجربه": 50
+        };
+        
+        // مقداردهی اولیه
+        document.addEventListener('DOMContentLoaded', function() {
+            // رویدادهای منو
+            mobileMenuBtn.addEventListener('click', function() {
+                mainMenu.classList.toggle('show');
+            });
+            
+            // رویدادهای لینک‌های منو
+            document.querySelectorAll('nav a').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    if (this.getAttribute('href').startsWith('#')) {
+                        e.preventDefault();
+                        const targetId = this.getAttribute('href').substring(1);
+                        const targetSection = document.getElementById(targetId);
+                        
+                        if (targetSection) {
+                            // بستن منو در موبایل
+                            mainMenu.classList.remove('show');
+                            
+                            // اسکرول به بخش مورد نظر
+                            window.scrollTo({
+                                top: targetSection.offsetTop - 80,
+                                behavior: 'smooth'
+                            });
+                            
+                            // فعال‌سازی لینک انتخاب شده
+                            document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
+                            this.classList.add('active');
+                        }
+                    }
+                });
+            });
+            
+            // رویداد دکمه ارسال پیام
+            sendButton.addEventListener('click', sendMessage);
+            userInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
+                }
+            });
+            
+            // رویداد دکمه اسکرول به بالا
+            scrollTop.addEventListener('click', function() {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+            
+            // نمایش/مخفی کردن دکمه اسکرول به بالا
+            window.addEventListener('scroll', function() {
+                if (window.scrollY > 300) {
+                    scrollTop.style.display = 'flex';
+                } else {
+                    scrollTop.style.display = 'none';
+                }
+            });
+            
+            // پاسخ اولیه از DeepSeek
+            setTimeout(() => {
+                addAIMessage("خوشحالم که می‌خوای خودت رو بهتر بشناسی! می‌تونی بگی چه چیزی بیشتر انگیزه‌دهنده تو هست؟ یا چه نوع فعالیت‌هایی بیشتر از همه لذت می‌بری؟");
+            }, 1000);
+        });
+        
+        // ارسال پیام کاربر
+        function sendMessage() {
+            const message = userInput.value.trim();
+            if (message === '') return;
+            
+            // اضافه کردن پیام کاربر به چت
+            addUserMessage(message);
+            
+            // پاک کردن فیلد ورودی
+            userInput.value = '';
+            
+            // اضافه کردن به تاریخچه مکالمه
+            conversationHistory.push({ role: 'user', content: message });
+            
+            // شبیه‌سازی تایپ کردن DeepSeek
+            simulateTyping();
+            
+            // پردازش پیام و تولید پاسخ
+            setTimeout(() => {
+                processUserMessage(message);
+            }, 1500);
+        }
+        
+        // اضافه کردن پیام کاربر به چت
+        function addUserMessage(message) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message user-message';
+            messageDiv.innerHTML = `
+                <div class="message-sender">شما:</div>
+                <div>${escapeHtml(message)}</div>
+            `;
+            chatMessages.appendChild(messageDiv);
+            scrollToBottom();
+        }
+        
+        // اضافه کردن پیام DeepSeek به چت
+        function addAIMessage(message) {
+            // حذف نشانگر تایپ کردن اگر وجود دارد
+            const typingIndicator = document.querySelector('.typing-indicator');
+            if (typingIndicator) {
+                typingIndicator.remove();
+            }
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message ai-message';
+            messageDiv.innerHTML = `
+                <div class="message-sender">DeepSeek:</div>
+                <div>${escapeHtml(message)}</div>
+            `;
+            chatMessages.appendChild(messageDiv);
+            scrollToBottom();
+            
+            // اضافه کردن به تاریخچه مکالمه
+            conversationHistory.push({ role: 'assistant', content: message });
+        }
+        
+        // شبیه‌سازی نشانگر تایپ کردن
+        function simulateTyping() {
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'typing-indicator';
+            typingDiv.innerHTML = `
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+            `;
+            chatMessages.appendChild(typingDiv);
+            scrollToBottom();
+        }
+        
+        // پردازش پیام کاربر و تولید پاسخ
+        function processUserMessage(message) {
+            // تحلیل متن برای شناسایی ویژگی‌های شخصیتی
+            analyzeTextForPersonality(message);
+            
+            // تولید پاسخ هوش مصنوعی بر اساس مکالمه
+            let response = generateAIResponse(message);
+            
+            // اضافه کردن پاسخ DeepSeek به چت
+            addAIMessage(response);
+            
+            // به‌روزرسانی تحلیل شخصیت اگر داده کافی موجود باشد
+            if (conversationHistory.length >= 3) {
+                updatePersonalityAnalysis();
+            }
+        }
+        
+        // تولید پاسخ هوش مصنوعی بر اساس پیام کاربر
+        function generateAIResponse(message) {
+            const lowerMessage = message.toLowerCase();
+            let response = "";
+            
+            // پاسخ‌های مبتنی بر قاعده ساده
+            if (lowerMessage.includes("سلام") || lowerMessage.includes("درود")) {
+                response = "سلام! خوشحالم که با من صحبت می‌کنی. می‌تونی بیشتر درباره خودت بگی؟ مثلاً وقتی تنها هستی چه کارهایی دوست داری انجام بدی؟";
+            } else if (lowerMessage.includes("خوب") || lowerMessage.includes("خوبم")) {
+                response = "خوشحالم که حالت خوبه! می‌تونی بگی معمولاً در موقعیت‌های اجتماعی چه احساسی داری؟ دوست داری در جمع باشی یا وقت تنهایی رو ترجیح می‌دی؟";
+            } else if (lowerMessage.includes("ممنون") || lowerMessage.includes("متشکرم")) {
+                response = "خواهش می‌کنم! لطفاً ادامه بده. دوست داری بیشتر درباره علایق و سرگرمی‌هات صحبت کنی یا درباره روابطت با دیگران؟";
+            } else if (lowerMessage.includes("تنها") || lowerMessage.includes("تنهایی")) {
+                response = "جالب است! می‌تونی بیشتر توضیح بدی که در زمان تنهایی چه احساسی داری و چه فعالیت‌هایی رو ترجیح می‌دی؟";
+            } else if (lowerMessage.includes("اجتماع") || lowerMessage.includes("مردم") || lowerMessage.includes("جمع")) {
+                response = "درباره موقعیت‌های اجتماعی صحبت کردی. می‌تونی بگی در جمع دوستان معمولاً چه نقشی داری؟ آیا بیشتر شنونده هستی یا صحبت می‌کنی؟";
+            } else if (lowerMessage.includes("کار") || lowerMessage.includes("شغل")) {
+                response = "در مورد کار صحبت کردی. آیا در محیط کار بیشتر دوست داری طبق برنامه عمل کنی یا انعطاف‌پذیر باشی؟";
+            } else if (lowerMessage.includes("برنامه") || lowerMessage.includes("طرح")) {
+                response = "جالب است! آیا معمولاً برای کارهایت برنامه‌ریزی دقیق می‌کنی یا ترجیح می‌دی انعطاف‌پذیر باشی و بسته به شرایط تصمیم بگیری؟";
+            } else if (lowerMessage.includes("مشکل") || lowerMessage.includes("چالش")) {
+                response = "وقتی با چالشی روبرو می‌شی، معمولاً چگونه آن را حل می‌کنی؟ آیا بیشتر به احساسات دیگران توجه می‌کنی یا به منطق و واقعیت‌ها؟";
+            } else if (lowerMessage.includes("تصمیم") || lowerMessage.includes("انتخاب")) {
+                response = "در تصمیم‌گیری‌های مهم، معمولاً به چه عوامل بیشتری توجه می‌کنی؟ احساسات شخصی، منطق، نظر دیگران یا چیز دیگری؟";
+            } else if (lowerMessage.includes("خلاق") || lowerMessage.includes("نوآور") || lowerMessage.includes("ایده")) {
+                response = "درباره خلاقیت صحبت کردی. آیا معمولاً ایده‌های جدید و متفاوت را دنبال می‌کنی یا روش‌های سنتی و امتحان شده را ترجیح می‌دهی؟";
+            } else if (lowerMessage.includes("علاقه") || lowerMessage.includes("سرگرمی")) {
+                response = "می‌تونی درباره علایق و سرگرمی‌هات بیشتر بگی؟ این فعالیت‌ها معمولاً فردی هستند یا گروهی؟";
+            } else if (lowerMessage.includes("کتاب") || lowerMessage.includes("فیلم") || lowerMessage.includes("موسیقی")) {
+                response = "جالب است! آیا معمولاً آثار خلاقانه و هنری را دنبال می‌کنی؟ چه نوع کتاب‌ها یا فیلم‌هایی بیشتر توجهت رو جلب می‌کنه؟";
+            } else if (lowerMessage.includes("آینده") || lowerMessage.includes("هدف")) {
+                response = "درباره آینده و اهدافت صحبت کردی. آیا معمولاً برنامه‌ریزی بلندمدت می‌کنی یا ترجیح می‌دی روی زمان حال تمرکز کنی؟";
+            } else {
+                // سوالات پیگیری عمومی
+                const followUps = [
+                    "می‌تونی بیشتر در این مورد توضیح بدی؟",
+                    "این جالبه! در این شرایط معمولاً چه احساسی داری؟",
+                    "با صحبت‌هایت دارم بهتر می‌تونم شخصیتت رو درک کنم. می‌تونی بگی در چنین موقعیت‌هایی معمولاً چگونه واکنش نشون می‌دی؟",
+                    "متشکرم که این رو گفتی. می‌تونی بگی آیا معمولاً چنین رفتاری رو در موقعیت‌های دیگه هم نشون می‌دی؟",
+                    "جالب بود! دوست داری در این مورد بیشتر صحبت کنیم یا موضوع دیگه‌ای رو مطرح کنی؟",
+                    "از صحبت‌هایت متوجه شدم که... می‌تونی بیشتر در این باره بگی؟"
+                ];
+                response = followUps[Math.floor(Math.random() * followUps.length)];
+            }
+            
+            return response;
+        }
+        
+        // تحلیل متن برای شناسایی ویژگی‌های شخصیتی
+        function analyzeTextForPersonality(text) {
+            const lowerText = text.toLowerCase();
+            
+            // تحلیل برونگرایی
+            if (lowerText.includes("اجتماع") || lowerText.includes("دوستان") || lowerText.includes("مهمانی") || 
+                lowerText.includes("گروه") || lowerText.includes("مردم") || lowerText.includes("جمع")) {
+                personalityScores["برونگرایی"] += 8;
+            } else if (lowerText.includes("تنهایی") || lowerText.includes("کم حرف") || lowerText.includes("ساکت") || 
+                      lowerText.includes("درونگرا") || lowerText.includes("خلوت")) {
+                personalityScores["برونگرایی"] -= 8;
+            }
+            
+            // تحلیل سازگاری
+            if (lowerText.includes("کمک") || lowerText.includes("همکاری") || lowerText.includes("دیگران") || 
+                lowerText.includes("احساس") || lowerText.includes("دلسوز") || lowerText.includes("مهربان")) {
+                personalityScores["سازگاری"] += 8;
+            } else if (lowerText.includes("رقابت") || lowerText.includes("خودم") || lowerText.includes("مستقل") || 
+                      lowerText.includes("جدی") || lowerText.includes("قاطع")) {
+                personalityScores["سازگاری"] -= 5;
+            }
+            
+            // تحلیل وجدان‌کاری
+            if (lowerText.includes("برنامه") || lowerText.includes("نظم") || lowerText.includes("مسئولیت") || 
+                lowerText.includes("تکمیل") || lowerText.includes("دقت") || lowerText.includes("منظم")) {
+                personalityScores["وجدان‌کاری"] += 8;
+            } else if (lowerText.includes("آزاد") || lowerText.includes("انعطاف") || lowerText.includes("بی‌برنامه") || 
+                      lowerText.includes("آسان‌گیر") || lowerText.includes("بدون برنامه")) {
+                personalityScores["وجدان‌کاری"] -= 5;
+            }
+            
+            // تحلیل ثبات عاطفی
+            if (lowerText.includes("آروم") || lowerText.includes("صبر") || lowerText.includes("کنترل") || 
+                lowerText.includes("ثبات") || lowerText.includes("آرامش") || lowerText.includes("صبور")) {
+                personalityScores["ثبات عاطفی"] += 8;
+            } else if (lowerText.includes("اضطراب") || lowerText.includes("استرس") || lowerText.includes("نگران") || 
+                      lowerText.includes("هیجان") || lowerText.includes("بی‌تاب")) {
+                personalityScores["ثبات عاطفی"] -= 8;
+            }
+            
+            // تحلیل گشودگی به تجربه
+            if (lowerText.includes("تجربه") || lowerText.includes("جدید") || lowerText.includes("خلاق") || 
+                lowerText.includes("کنجکاو") || lowerText.includes("ایده") || lowerText.includes("نوآور")) {
+                personalityScores["گشودگی به تجربه"] += 8;
+            } else if (lowerText.includes("سنتی") || lowerText.includes("روال") || lowerText.includes("قدیمی") || 
+                      lowerText.includes("محافظه‌کار") || lowerText.includes("تکراری")) {
+                personalityScores["گشودگی به تجربه"] -= 5;
+            }
+            
+            // محدود کردن مقادیر بین ۰ تا ۱۰۰
+            for (let trait in personalityScores) {
+                if (personalityScores[trait] > 100) personalityScores[trait] = 100;
+                if (personalityScores[trait] < 0) personalityScores[trait] = 0;
+            }
+        }
+        
+        // به‌روزرسانی تحلیل شخصیت
+        function updatePersonalityAnalysis() {
+            // تعیین تیپ شخصیتی بر اساس امتیازات
+            let personalityType = "INFP";
+            
+            // منطق ساده برای تعیین تیپ شخصیتی
+            if (personalityScores["برونگرایی"] > 70) {
+                if (personalityScores["وجدان‌کاری"] > 70) {
+                    personalityType = "ESTJ";
+                } else {
+                    personalityType = "ENFP";
+                }
+            } else {
+                if (personalityScores["وجدان‌کاری"] > 70) {
+                    personalityType = "INTJ";
+                } else {
+                    personalityType = "INFP";
+                }
+            }
+            
+            // به‌روزرسانی نمایش تیپ شخصیتی
+            const typeData = personalityTypes[personalityType];
+            personalityTypeEl.textContent = personalityType;
+            personalityNameEl.textContent = typeData.name;
+            personalityDescriptionEl.textContent = typeData.description;
+            
+            // به‌روزرسانی نوارهای پیشرفت
+            updateProgressBars();
+        }
+        
+        // به‌روزرسانی نوارهای پیشرفت
+        function updateProgressBars() {
+            extraversionBar.style.width = personalityScores["برونگرایی"] + "%";
+            extraversionBar.parentElement.parentElement.querySelector('.trait-value').textContent = personalityScores["برونگرایی"] + "%";
+            
+            agreeablenessBar.style.width = personalityScores["سازگاری"] + "%";
+            agreeablenessBar.parentElement.parentElement.querySelector('.trait-value').textContent = personalityScores["سازگاری"] + "%";
+            
+            conscientiousnessBar.style.width = personalityScores["وجدان‌کاری"] + "%";
+            conscientiousnessBar.parentElement.parentElement.querySelector('.trait-value').textContent = personalityScores["وجدان‌کاری"] + "%";
+            
+            emotionalStabilityBar.style.width = personalityScores["ثبات عاطفی"] + "%";
+            emotionalStabilityBar.parentElement.parentElement.querySelector('.trait-value').textContent = personalityScores["ثبات عاطفی"] + "%";
+            
+            opennessBar.style.width = personalityScores["گشودگی به تجربه"] + "%";
+            opennessBar.parentElement.parentElement.querySelector('.trait-value').textContent = personalityScores["گشودگی به تجربه"] + "%";
+        }
+        
+        // اسکرول به پایین چت
+        function scrollToBottom() {
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+        
+        // فرار کردن HTML برای جلوگیری از حملات XSS
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>
